@@ -34,7 +34,7 @@ class InvitacionForm(forms.ModelForm):
 CapaParallaxFormSet = inlineformset_factory(
     Invitacion, 
     CapaParallax, 
-    fields=['imagen', 'z_index', 'orden', 'dispositivo', 'pegar_abajo'], 
+    fields=['imagen', 'z_index', 'orden', 'dispositivo', 'pegar_abajo', 'es_sujeto_foco'], 
     extra=0, 
     can_delete=True,
     widgets={
@@ -43,5 +43,6 @@ CapaParallaxFormSet = inlineformset_factory(
         'orden': forms.NumberInput(attrs={'class': 'form-control form-control-sm', 'placeholder': 'Orden visual'}),
         'dispositivo': forms.Select(attrs={'class': 'form-select form-select-sm'}),
         'pegar_abajo': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        'es_sujeto_foco': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
     }
 )

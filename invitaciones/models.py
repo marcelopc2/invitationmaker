@@ -45,6 +45,7 @@ class CapaParallax(models.Model):
     
     dispositivo = models.CharField(max_length=20, choices=DISPOSITIVO_CHOICES, default='todos', help_text="¿En qué pantallas debe mostrarse esta capa?")
     pegar_abajo = models.BooleanField(default=False, help_text="Si se activa, la imagen no volará hacia arriba con el giroscopio, ocultando el corte del borde inferior.")
+    es_sujeto_foco = models.BooleanField(default=False, help_text="Marca esta capa como el sujeto principal. El desenfoque Bokeh se calibrará para mantenerla 100% nítida.")
 
     class Meta:
         ordering = ['orden']

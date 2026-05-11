@@ -175,7 +175,7 @@
         
         const layersDataUnfiltered = [
             {% for capa in invitacion.capas.all %}
-            { url: "{{ capa.imagen.url }}", z: {{ capa.z_index }}, dispositivo: "{{ capa.dispositivo }}", pegarAbajo: {{ capa.pegar_abajo|yesno:"true,false" }} },
+            { url: "{{ capa.imagen.url }}", z: {{ capa.z_index }}, dispositivo: "{{ capa.dispositivo }}", pegarAbajo: {{ capa.pegar_abajo|yesno:"true,false" }}, esSujetoFoco: {{ capa.es_sujeto_foco|yesno:"true,false" }} },
             {% endfor %}
         ];
         
@@ -271,8 +271,14 @@
             composer = new THREE.EffectComposer(renderer);
             renderPass = new THREE.RenderPass(scene, camera);
             composer.addPass(renderPass);
+            
+            // Calcular foco dinámico: si hay sujeto marcado, usamos su Z; si no, Z=0 por defecto
+            const sujetoLayer = layersData.find(l => l.esSujetoFoco);
+            const sujetoZ = sujetoLayer ? sujetoLayer.z : 0;
+            const focalDistance = camera.position.z - sujetoZ; // Distancia exacta cámara → sujeto
+
             bokehPass = new THREE.BokehPass(scene, camera, {
-                focus: 15.0, // Cámara en Z=15, sujeto en Z=0 → distancia focal exacta = 15
+                focus: focalDistance,
                 aperture: 0.005, maxblur: 0.01,
                 width: window.innerWidth, height: window.innerHeight
             });

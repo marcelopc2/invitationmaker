@@ -177,6 +177,12 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="d-flex gap-3 mb-2">
+                            <div class="form-check form-switch">
+                                {{ capa_form.es_sujeto_foco }}
+                                <label class="form-check-label small fw-bold text-warning" for="{{ capa_form.es_sujeto_foco.id_for_label }}">⭐ Sujeto de Foco (Bokeh)</label>
+                            </div>
+                        </div>
                         {% if capas_formset.can_delete %}
                         <div class="form-check form-switch mt-2">
                             {{ capa_form.DELETE }}
@@ -225,6 +231,12 @@
                         {{ capas_formset.empty_form.pegar_abajo }}
                         <label class="form-check-label small" for="{{ capas_formset.empty_form.pegar_abajo.id_for_label }}">Pegar Abajo</label>
                     </div>
+                </div>
+            </div>
+            <div class="d-flex gap-3 mb-2">
+                <div class="form-check form-switch">
+                    {{ capas_formset.empty_form.es_sujeto_foco }}
+                    <label class="form-check-label small fw-bold text-warning" for="{{ capas_formset.empty_form.es_sujeto_foco.id_for_label }}">⭐ Sujeto de Foco (Bokeh)</label>
                 </div>
             </div>
             <div class="form-check form-switch mt-2 d-none">
