@@ -1,0 +1,313 @@
+{% extends 'invitaciones/cms/base_cms.html' %}
+
+{% block title %}{{ title }} | CMS{% endblock %}
+
+{% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Inter:wght@400;600;700&family=Nunito:wght@400;600;700&family=Pacifico&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+
+<div class="mb-4">
+    <a href="{% url 'cms_dashboard' %}" class="text-decoration-none text-muted mb-2 d-inline-block">
+        <i class="bi bi-arrow-left me-1"></i> Volver al Dashboard
+    </a>
+    <h1 class="page-title">{{ title }}</h1>
+</div>
+
+<div class="card border-0 p-4 shadow-sm mb-5">
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        
+        <h4 class="fw-bold mb-4 text-primary" style="color: var(--cms-primary) !important;">1. Datos Generales</h4>
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <label class="form-label fw-medium">Título de la Invitación</label>
+                {{ form.titulo_landing }}
+                <div class="text-danger small">{{ form.titulo_landing.errors }}</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-medium">URL Personalizada (Slug)</label>
+                {{ form.slug }}
+                <div class="form-text">Ej: mateo-2026. No uses espacios.</div>
+                <div class="text-danger small">{{ form.slug.errors }}</div>
+            </div>
+            <div class="col-12">
+                <label class="form-label fw-medium">Mensaje / Dedicatoria</label>
+                {{ form.descripcion }}
+                <div class="text-danger small">{{ form.descripcion.errors }}</div>
+            </div>
+        </div>
+
+        <hr class="mb-4" style="opacity: 0.1;">
+
+        <h4 class="fw-bold mb-4 text-primary" style="color: var(--cms-primary) !important;">2. Evento y Ubicación</h4>
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <label class="form-label fw-medium">Fecha y Hora</label>
+                {{ form.fecha_evento }}
+                <div class="text-danger small">{{ form.fecha_evento.errors }}</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-medium">Dirección (Texto legible)</label>
+                {{ form.direccion_texto }}
+                <div class="text-danger small">{{ form.direccion_texto.errors }}</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-medium">Enlace de Google Maps</label>
+                {{ form.direccion_google_maps_link }}
+                <div class="text-danger small">{{ form.direccion_google_maps_link.errors }}</div>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label fw-medium">Enlace Lista de Regalos (Opcional)</label>
+                {{ form.link_lista_deseos }}
+                <div class="text-danger small">{{ form.link_lista_deseos.errors }}</div>
+            </div>
+        </div>
+
+        <hr class="mb-4" style="opacity: 0.1;">
+
+        <h4 class="fw-bold mb-4 text-primary" style="color: var(--cms-primary) !important;">3. Apariencia y Diseño</h4>
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <label class="form-label fw-medium">Tipografía Principal</label>
+                {{ form.fuente_texto }}
+                <div class="text-danger small">{{ form.fuente_texto.errors }}</div>
+                
+                <!-- Previsualizador de Fuentes -->
+                <div class="mt-3 p-3 border rounded bg-light text-center">
+                    <span class="small text-muted d-block mb-2">Vista Previa:</span>
+                    <div id="font-preview" style="font-size: 1.5rem; color: #333; line-height: 1.2;">
+                        ¡Bienvenido Mateo!
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-medium">Color de Botones y Acentos</label>
+                <div class="d-flex align-items-center gap-2">
+                    {{ form.color_primario }}
+                    <span class="small text-muted">Hexadecimal</span>
+                </div>
+                <div class="text-danger small">{{ form.color_primario.errors }}</div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-medium">Color del Texto</label>
+                <div class="d-flex align-items-center gap-2">
+                    {{ form.color_texto }}
+                    <span class="small text-muted">Hexadecimal</span>
+                </div>
+                <div class="text-danger small">{{ form.color_texto.errors }}</div>
+            </div>
+        </div>
+
+        <hr class="mb-4" style="opacity: 0.1;">
+
+        <h4 class="fw-bold mb-4 text-primary" style="color: var(--cms-primary) !important;">4. Física y Parallax 3D</h4>
+        <div class="row g-4 mb-5">
+            <div class="col-md-4">
+                <label class="form-label fw-medium">Fuerza del Giroscopio</label>
+                {{ form.fuerza_giro }}
+                <div class="form-text">Multiplicador. 1.0 es normal.</div>
+                <div class="text-danger small">{{ form.fuerza_giro.errors }}</div>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label fw-medium">Fuerza del Desplazamiento</label>
+                {{ form.fuerza_desplazamiento }}
+                <div class="form-text">Multiplicador. 1.0 es normal.</div>
+                <div class="text-danger small">{{ form.fuerza_desplazamiento.errors }}</div>
+            </div>
+            <div class="col-md-4 d-flex align-items-center">
+                <div class="form-check form-switch mt-2">
+                    {{ form.activar_bokeh }}
+                    <label class="form-check-label fw-medium" for="{{ form.activar_bokeh.id_for_label }}">
+                        Activar Z-Depth (Desenfoque Bokeh)
+                    </label>
+                    <div class="form-text">Consume más recursos gráficos.</div>
+                </div>
+            </div>
+        </div>
+
+        <hr class="mb-4" style="opacity: 0.1;">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="fw-bold m-0 text-primary" style="color: var(--cms-primary) !important;">5. Capas Parallax 3D</h4>
+            <button type="button" class="btn btn-outline-primary btn-sm" id="add-layer-btn">
+                <i class="bi bi-plus-lg"></i> Añadir Capa
+            </button>
+        </div>
+
+        <div class="alert alert-info border-0 bg-opacity-10 mb-4" style="background-color: rgba(139, 92, 246, 0.1); color: #5b21b6;">
+            <i class="bi bi-info-circle-fill me-2"></i> <strong>Tip:</strong> Si subes solo <strong>1 capa</strong>, la invitación será estática (sin parallax). Para múltiples capas, usa Z-Index negativos para fondos (ej: -5) y positivos para objetos frontales (ej: 5).
+        </div>
+        
+        {{ capas_formset.management_form }}
+        
+        <div id="capas-container" class="row g-4 mb-4">
+            {% for capa_form in capas_formset %}
+                <div class="col-md-4 capa-form">
+                    <div class="p-3 border rounded bg-light h-100 position-relative">
+                        {{ capa_form.id }}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold"><i class="bi bi-image me-1"></i> Imagen (PNG preferido)</label>
+                            {{ capa_form.imagen }}
+                            <div class="text-danger small">{{ capa_form.imagen.errors }}</div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small mb-1">Z-Index</label>
+                                {{ capa_form.z_index }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small mb-1">Orden</label>
+                                {{ capa_form.orden }}
+                            </div>
+                        </div>
+                        <div class="row g-2 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small mb-1"><i class="bi bi-display"></i> Dispositivo</label>
+                                {{ capa_form.dispositivo }}
+                            </div>
+                            <div class="col-6 d-flex align-items-end pb-1">
+                                <div class="form-check form-switch">
+                                    {{ capa_form.pegar_abajo }}
+                                    <label class="form-check-label small" for="{{ capa_form.pegar_abajo.id_for_label }}">Pegar Abajo</label>
+                                </div>
+                            </div>
+                        </div>
+                        {% if capas_formset.can_delete %}
+                        <div class="form-check form-switch mt-2">
+                            {{ capa_form.DELETE }}
+                            <label class="form-check-label text-danger small" for="{{ capa_form.DELETE.id_for_label }}">Eliminar esta capa</label>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="d-flex justify-content-end gap-3 mt-5 pt-3 border-top">
+            <a href="{% url 'cms_dashboard' %}" class="btn btn-light px-4 py-2 fw-medium text-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary px-5 py-2">
+                <i class="bi bi-check-lg me-1"></i> Guardar Invitación
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Template escondido para nuevas capas -->
+<div id="empty-form" class="d-none">
+    <div class="col-md-4 capa-form">
+        <div class="p-3 border rounded bg-light h-100 position-relative">
+            <div class="mb-3">
+                <label class="form-label fw-bold"><i class="bi bi-image me-1"></i> Imagen (PNG preferido)</label>
+                {{ capas_formset.empty_form.imagen }}
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small mb-1">Z-Index</label>
+                    {{ capas_formset.empty_form.z_index }}
+                </div>
+                <div class="col-6">
+                    <label class="form-label small mb-1">Orden</label>
+                    {{ capas_formset.empty_form.orden }}
+                </div>
+            </div>
+            <div class="row g-2 mb-3">
+                <div class="col-6">
+                    <label class="form-label small mb-1"><i class="bi bi-display"></i> Dispositivo</label>
+                    {{ capas_formset.empty_form.dispositivo }}
+                </div>
+                <div class="col-6 d-flex align-items-end pb-1">
+                    <div class="form-check form-switch">
+                        {{ capas_formset.empty_form.pegar_abajo }}
+                        <label class="form-check-label small" for="{{ capas_formset.empty_form.pegar_abajo.id_for_label }}">Pegar Abajo</label>
+                    </div>
+                </div>
+            </div>
+            <div class="form-check form-switch mt-2 d-none">
+                {{ capas_formset.empty_form.DELETE }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Live Font Previewer
+    const fontSelect = document.getElementById('id_fuente_texto');
+    const fontPreview = document.getElementById('font-preview');
+    const titleInput = document.getElementById('id_titulo_landing');
+
+    function updateFontPreview() {
+        if (!fontSelect || !fontPreview) return;
+        
+        // Actualizar tipografía
+        const selectedFont = fontSelect.value;
+        fontPreview.style.fontFamily = `"${selectedFont}", sans-serif`;
+        
+        // Actualizar texto si hay uno escrito
+        if (titleInput && titleInput.value.trim() !== '') {
+            fontPreview.textContent = titleInput.value;
+        } else {
+            fontPreview.textContent = '¡Bienvenido Mateo!';
+        }
+    }
+
+    if (fontSelect) {
+        fontSelect.addEventListener('change', updateFontPreview);
+    }
+    if (titleInput) {
+        titleInput.addEventListener('input', updateFontPreview);
+    }
+    // Inicializar al cargar
+    updateFontPreview();
+
+    // 2. Lógica de añadir capas dinámicas
+    const addBtn = document.getElementById('add-layer-btn');
+    const container = document.getElementById('capas-container');
+    const totalForms = document.getElementById('id_capas-TOTAL_FORMS');
+    const emptyFormTemplate = document.getElementById('empty-form').innerHTML;
+
+    addBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        const formCount = parseInt(totalForms.value);
+        
+        // Reemplazar el prefijo '__prefix__' por el índice real
+        const newFormHtml = emptyFormTemplate.replace(/__prefix__/g, formCount);
+        
+        container.insertAdjacentHTML('beforeend', newFormHtml);
+        totalForms.value = formCount + 1;
+
+        // Auto-cálculo para la nueva capa: Primera es la más cercana (+3), siguientes se alejan
+        const newForm = container.lastElementChild;
+        const zInput = newForm.querySelector('input[name$="-z_index"]');
+        const orderInput = newForm.querySelector('input[name$="-orden"]');
+        const deviceSelect = newForm.querySelector('select[name$="-dispositivo"]');
+        const pinBottomCheck = newForm.querySelector('input[name$="-pegar_abajo"]');
+        
+        if (zInput && orderInput) {
+            const visibleLayers = container.querySelectorAll('.capa-form').length;
+            const currentIndex = visibleLayers - 1; // 0-indexed
+            
+            orderInput.value = currentIndex;
+            
+            // Auto-Cálculo de Valores Óptimos (Frente -> Medio -> Fondo)
+            if (currentIndex === 0) {
+                // Primera capa: Foreground (Z=5, Pegado Abajo)
+                zInput.value = 5;
+                if (pinBottomCheck) pinBottomCheck.checked = true;
+            } else if (currentIndex === 1) {
+                // Segunda capa: Sujeto Principal (Z=0)
+                zInput.value = 0;
+                if (pinBottomCheck) pinBottomCheck.checked = false;
+            } else if (currentIndex === 2) {
+                // Tercera capa: Fondo Lejano (Z=-5)
+                zInput.value = -5;
+                if (pinBottomCheck) pinBottomCheck.checked = false;
+            } else {
+                // Capas adicionales
+                zInput.value = -5 - (currentIndex - 2) * 5; 
+                if (pinBottomCheck) pinBottomCheck.checked = false;
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

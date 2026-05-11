@@ -1,0 +1,82 @@
+{% extends 'invitaciones/cms/base_cms.html' %}
+
+{% block title %}Dashboard | Invitaciones{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Tus Invitaciones</h1>
+        <p class="text-muted mt-1 mb-0">Gestiona y personaliza los eventos activos.</p>
+    </div>
+    <a href="{% url 'cms_crear' %}" class="btn btn-primary shadow-sm">
+        <i class="bi bi-plus-lg me-1"></i> Nueva Invitación
+    </a>
+</div>
+
+{% if invitaciones %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for inv in invitaciones %}
+        <div class="col">
+            <div class="card h-100 border-0 p-1 hover-card">
+                <!-- Miniatura de la invitación (Fondo) -->
+                <div class="position-relative rounded-top" style="height: 160px; overflow: hidden; background-color: #e2e8f0;">
+                    {% with primera_capa=inv.capas.first %}
+                    {% if primera_capa and primera_capa.imagen %}
+                        <img src="{{ primera_capa.imagen.url }}" class="w-100 h-100 object-fit-cover rounded-top" alt="Fondo" style="opacity: 0.8;">
+                    {% else %}
+                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
+                            <i class="bi bi-image" style="font-size: 2rem;"></i>
+                        </div>
+                    {% endif %}
+                    {% endwith %}
+                    <div class="position-absolute top-0 end-0 m-2">
+                        <span class="badge bg-white text-dark shadow-sm">/{{ inv.slug }}</span>
+                    </div>
+                </div>
+                
+                <div class="card-body">
+                    <h5 class="card-title fw-bold mb-1">{{ inv.titulo_landing }}</h5>
+                    <p class="text-muted small mb-3">
+                        <i class="bi bi-calendar-event me-1"></i> {{ inv.fecha_evento|date:"d M Y, H:i" }}
+                    </p>
+                    
+                    <div class="d-flex gap-2 mt-auto">
+                        <a href="{% url 'cms_editar' inv.slug %}" class="btn btn-outline-primary btn-sm flex-grow-1">
+                            <i class="bi bi-pencil-square"></i> Editar
+                        </a>
+                        <a href="{% url 'invitacion_detail' inv.slug %}" target="_blank" class="btn btn-light btn-sm text-secondary" title="Ver Invitación">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        <a href="{% url 'cms_borrar' inv.slug %}" class="btn btn-light btn-sm text-danger" title="Eliminar">
+                            <i class="bi bi-trash3"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+{% else %}
+    <div class="card text-center p-5 border-0 shadow-sm mt-4">
+        <div class="card-body">
+            <div class="mb-4 text-muted opacity-50">
+                <i class="bi bi-inbox" style="font-size: 4rem;"></i>
+            </div>
+            <h3 class="fw-bold">No hay invitaciones aún</h3>
+            <p class="text-muted mb-4">Crea tu primera invitación para empezar a compartirla.</p>
+            <a href="{% url 'cms_crear' %}" class="btn btn-primary btn-lg">
+                <i class="bi bi-plus-lg me-2"></i>Crear Primera Invitación
+            </a>
+        </div>
+    </div>
+{% endif %}
+
+<style>
+    .hover-card:hover {
+        transform: translateY(-5px);
+    }
+    .object-fit-cover {
+        object-fit: cover;
+    }
+</style>
+{% endblock %}

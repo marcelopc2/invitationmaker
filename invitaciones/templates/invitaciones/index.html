@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invitaciones Disponibles</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen p-8">
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8">Invitaciones de Baby Shower</h1>
+        
+        {% if invitaciones %}
+            <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {% for inv in invitaciones %}
+                <a href="{% url 'invitacion_detail' inv.slug %}" class="block bg-white rounded-xl shadow-sm hover:shadow-md transition p-6 border border-gray-100">
+                    <h2 class="text-xl font-semibold text-blue-600 mb-2">{{ inv.titulo_landing }}</h2>
+                    <p class="text-gray-600 text-sm mb-4">{{ inv.fecha_evento|date:"d M Y" }}</p>
+                    <span class="text-sm text-gray-500">Ver invitación &rarr;</span>
+                </a>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="bg-white rounded-xl shadow-sm p-8 text-center border border-gray-100">
+                <p class="text-gray-600 mb-4">No hay invitaciones creadas aún.</p>
+                <a href="{% url 'admin:index' %}" class="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition">
+                    Ir al Panel de Administración
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

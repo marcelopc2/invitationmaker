@@ -1,0 +1,14 @@
+venv/
+__pycache__/
+*.pyc
+db.sqlite3
+media/
+.env
+.claude
+.agents
+.agents/
+.env.example
+skills-lock.json
+CLAUDE.md
+SECURITY_AUDIT.md
+docs/

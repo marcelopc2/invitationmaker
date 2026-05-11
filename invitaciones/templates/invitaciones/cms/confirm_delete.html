@@ -1,0 +1,39 @@
+{% extends 'invitaciones/cms/base_cms.html' %}
+
+{% block title %}Eliminar {{ object.titulo_landing }} | CMS{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-lg" style="border-radius: var(--cms-radius); overflow: hidden;">
+            <div class="bg-danger text-white p-4 text-center">
+                <i class="bi bi-exclamation-triangle-fill" style="font-size: 3rem;"></i>
+                <h3 class="fw-bold mt-2 mb-0">Eliminar Invitación</h3>
+            </div>
+            
+            <div class="card-body p-5 text-center">
+                <p class="text-muted mb-4 fs-5">
+                    ¿Estás seguro de que deseas eliminar permanentemente la invitación: <br>
+                    <strong class="text-dark">"{{ object.titulo_landing }}"</strong>?
+                </p>
+                
+                <div class="alert alert-warning border-0 bg-opacity-25 py-3 mb-5" style="background-color: rgba(245, 158, 11, 0.1); color: #b45309;">
+                    <i class="bi bi-info-circle me-2"></i> Esta acción no se puede deshacer y los invitados ya no podrán verla.
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'cms_dashboard' %}" class="btn btn-light px-4 py-2 fw-medium text-secondary" style="border-radius: 0.75rem;">
+                            Cancelar
+                        </a>
+                        <button type="submit" class="btn btn-danger px-5 py-2">
+                            <i class="bi bi-trash3 me-1"></i> Sí, Eliminar Definitivamente
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
