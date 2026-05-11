@@ -122,6 +122,12 @@
                     <div class="form-text">Consume más recursos gráficos.</div>
                 </div>
             </div>
+            <div class="col-md-4">
+                <label class="form-label fw-medium"><i class="bi bi-circle-half me-1"></i> Intensidad de Viñeta</label>
+                {{ form.intensidad_vigneta }}
+                <div class="form-text">0 = sin viñeta, 1 = máxima. (Recomendado: 0.4–0.6)</div>
+                <div class="text-danger small">{{ form.intensidad_vigneta.errors }}</div>
+            </div>
         </div>
 
         <hr class="mb-4" style="opacity: 0.1;">

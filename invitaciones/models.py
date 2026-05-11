@@ -26,6 +26,7 @@ class Invitacion(models.Model):
     fuerza_giro = models.FloatField(default=1.0, help_text="Multiplicador de la rotación 3D (Ej: 1.0 normal, 0.5 suave)")
     fuerza_desplazamiento = models.FloatField(default=1.0, help_text="Multiplicador del deslizamiento (Ej: 1.0 normal, 2.0 agresivo)")
     activar_bokeh = models.BooleanField(default=False, help_text="Activar efecto cinematográfico de desenfoque de profundidad")
+    intensidad_vigneta = models.FloatField(default=0.5, help_text="Intensidad de la viñeta (0 = ninguna, 1 = máxima)")
 
     def __str__(self):
         return self.titulo_landing

@@ -75,9 +75,37 @@
             opacity: 0;
             transform: translateY(30px);
         }
+
+        /* ---- Viñeta ---- */
+        #vigneta-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw; height: 100vh;
+            z-index: 5;
+            pointer-events: none;
+            background: radial-gradient(ellipse at center,
+                transparent 30%,
+                rgba(0,0,0,var(--vigneta-intensity, 0.5)) 100%);
+        }
+
+        /* ---- Iris Intro ---- */
+        #iris-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background: #000;
+            clip-path: circle(0% at 50% 50%);
+            pointer-events: none;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Iris Intro Overlay -->
+    <div id="iris-overlay"></div>
+
+    <!-- Viñeta CSS configurable -->
+    <div id="vigneta-overlay" style="--vigneta-intensity: {{ invitacion.intensidad_vigneta|default:'0.5' }};"></div>
 
     <div id="canvas-container"></div>
 
@@ -136,7 +164,7 @@
         const scene = new THREE.Scene();
         
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        camera.position.z = 10;
+        camera.position.z = 15; // Cámara a Z=15 para que el sujeto en Z=0 esté a distancia exacta de 15 unidades
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
         renderer.setSize(window.innerWidth, window.innerHeight);
@@ -207,11 +235,17 @@
                     
                     plane.scale.set(finalWidth, finalHeight, 1);
                     
-                    // Centrar perfectamente o Pegar Abajo según el CMS
+                    // Centrar perfectamente o Pegar Abajo con Sangrado (Bleed) del 20% según el CMS
                     let base_x = 0;
                     let base_y = 0;
                     if (layerData.pegarAbajo) {
-                        base_y = -(planeHeightAtDistance / 2) + (finalHeight / 2);
+                        // Sangrado del 20%: image es más grande de lo visible
+                        const bleedMultiplier = 1.20;
+                        finalWidth *= bleedMultiplier;
+                        finalHeight *= bleedMultiplier;
+                        plane.scale.set(finalWidth, finalHeight, 1);
+                        // Enterramos el borde inferior un 10% fuera de la pantalla como margen de seguridad
+                        base_y = -(planeHeightAtDistance / 2) + (finalHeight / 2) - (finalHeight * 0.10);
                     }
 
                     plane.position.x = base_x;
@@ -238,7 +272,8 @@
             renderPass = new THREE.RenderPass(scene, camera);
             composer.addPass(renderPass);
             bokehPass = new THREE.BokehPass(scene, camera, {
-                focus: 10, aperture: 0.005, maxblur: 0.05, // Apertura equilibrada para que Z=0 (sujeto) se vea nítido
+                focus: 15.0, // Cámara en Z=15, sujeto en Z=0 → distancia focal exacta = 15
+                aperture: 0.005, maxblur: 0.01,
                 width: window.innerWidth, height: window.innerHeight
             });
             composer.addPass(bokehPass);
@@ -249,33 +284,50 @@
             Promise.all(promises).then((loadedPlanes) => {
                 loadedPlanes.sort((a, b) => a.userData.finalZ - b.userData.finalZ);
                 planes.push(...loadedPlanes);
-                
                 isDynamic = true;
-                loadedPlanes.forEach((p, index) => {
-                    gsap.to(p.material, { opacity: 1, duration: 2, ease: "power2.out", delay: index * 0.2 });
-                    gsap.to(p.position, { z: p.userData.finalZ, duration: 2.5, ease: "expo.out", delay: index * 0.2 });
+
+                // ── Fase 1: Iris wipe (el círculo se abre desde el centro) ─────────────
+                gsap.to('#iris-overlay', {
+                    clipPath: 'circle(150% at 50% 50%)',
+                    duration: 1.0,
+                    ease: 'power2.inOut',
+                    onComplete: () => document.getElementById('iris-overlay').remove()
                 });
-                
-                
-                // Diseño Premium de Textos (3D Rotate + Blur + Stagger)
-                const tl = gsap.timeline({ delay: 0.5 });
-                tl.from('.parallax-title', { 
-                    y: 80, rotationX: 45, opacity: 0, filter: "blur(15px)", duration: 1.8, 
-                    ease: "expo.out", transformOrigin: "50% 100%" 
-                })
-                .from('.parallax-info p', { 
-                    y: 30, opacity: 0, duration: 1.2, 
-                    stagger: 0.2, ease: "back.out(2)" 
-                }, "-=1.4")
-                .from('.parallax-desc', { 
-                    y: 40, opacity: 0, duration: 1.5, filter: "blur(5px)",
-                    ease: "power4.out" 
-                }, "-=1.0")
-                // fromTo en los botones con clearProps evita el bug de que desaparezcan al terminar
-                .fromTo('.btn-glass', 
-                    { y: 30, opacity: 0, scale: 0.8 }, 
-                    { y: 0, opacity: 1, scale: 1, duration: 1, stagger: 0.15, ease: "back.out(1.5)", clearProps: "all" }, 
-                "-=0.8");
+
+                // ── Fase 2: Planos entran volando desde la profundidad ──────────────────
+                const imageDuration = 2.5;
+                loadedPlanes.forEach((p, index) => {
+                    gsap.to(p.material, { opacity: 1, duration: imageDuration, ease: 'power2.out', delay: index * 0.15 });
+                    gsap.to(p.position,  { z: p.userData.finalZ, duration: imageDuration, ease: 'expo.out', delay: index * 0.15 });
+                });
+
+                // ── Fase 3: UI entra DESPUÉS de que las imágenes terminen ───────────────
+                const uiDelay = imageDuration + (loadedPlanes.length - 1) * 0.15;
+                const tl = gsap.timeline({ delay: uiDelay });
+
+                // Título: reveal con máscara 3D + blur
+                tl.fromTo('#titulo',
+                    { y: 80, rotationX: 55, opacity: 0, filter: 'blur(20px)', transformOrigin: '50% 100%' },
+                    { y: 0, rotationX: 0, opacity: 1, filter: 'blur(0px)', duration: 1.4, ease: 'expo.out' })
+
+                // Fecha y dirección: slide desde la izquierda
+                .fromTo('.parallax-info p',
+                    { x: -40, opacity: 0 },
+                    { x: 0, opacity: 1, duration: 0.9, stagger: 0.18, ease: 'power3.out' },
+                    '-=0.9')
+
+                // Descripción: fade + blur desde abajo
+                .fromTo('#descripcion',
+                    { y: 35, opacity: 0, filter: 'blur(8px)' },
+                    { y: 0, opacity: 1, filter: 'blur(0px)', duration: 1.2, ease: 'power4.out' },
+                    '-=0.6')
+
+                // Botones: pop elástico exagerado
+                .fromTo('.btn-glass',
+                    { scale: 0, opacity: 0 },
+                    { scale: 1, opacity: 1, duration: 0.8, stagger: 0.12,
+                      ease: 'elastic.out(1.2, 0.5)', clearProps: 'transform,opacity' },
+                    '-=0.4');
             });
         }
 
@@ -314,10 +366,12 @@
                     // Posición X
                     plane.position.x = plane.userData.base_x + (-targetX * plane.userData.zMultiplier * fuerzaDesplazamiento);
                     
-                    // Posición Y con Lógica Anti-Cortes (Pegar Abajo)
+                    // Posición Y con "Tracking Inverso Gravitacional" para Pegar Abajo:
+                    // Cuando el giroscopio empuja hacia arriba, la capa frontal se mueve hacia ABAJO,
+                    // manteniéndose siempre anclada al suelo y sin revelar el corte del borde inferior.
                     let displacementY = targetY * plane.userData.zMultiplier * fuerzaDesplazamiento;
-                    if (plane.userData.pegarAbajo && displacementY > 0) {
-                        displacementY = 0; // Clampeamos hacia arriba para que no revele el corte inferior
+                    if (plane.userData.pegarAbajo) {
+                        displacementY = -displacementY * 0.4; // Invertimos Y y suavizamos
                     }
                     plane.position.y = plane.userData.base_y + displacementY;
                     
