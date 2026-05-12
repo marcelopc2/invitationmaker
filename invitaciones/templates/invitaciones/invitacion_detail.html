@@ -280,9 +280,9 @@
             console.log("🎯 FOCO CINEMATOGRÁFICO:", focalDistance, "Z:", sujetoZ);
 
             bokehPass = new THREE.BokehPass(scene, camera, {
-                focus:    focalDistance, 
-                aperture: 0.05,        // ¡Mucha más apertura para desenfoque fuerte!
-                maxblur:  0.02,        // Desenfoque máximo más exagerado
+                focus:    15.0, 
+                aperture: 0.01,        // Apertura equilibrada para notar el efecto
+                maxblur:  0.01,        // Desenfoque de fondo elegante
                 width: window.innerWidth, height: window.innerHeight
             });
             composer.addPass(bokehPass);
@@ -408,6 +408,15 @@
                     plane.rotation.y = targetX * plane.userData.zMultiplier * 0.1 * fuerzaGiro;
                     plane.rotation.x = targetY * plane.userData.zMultiplier * 0.1 * fuerzaGiro;
                 });
+
+                // ── Auto-Foco Dinámico ──────────────────────────────────────────
+                if (activarBokeh && bokehPass) {
+                    const sujeto = planes.find(p => p.userData.esSujetoFoco);
+                    if (sujeto) {
+                        // El lente sigue al sujeto en tiempo real mientras vuela
+                        bokehPass.uniforms.focus.value = camera.position.z - sujeto.position.z;
+                    }
+                }
             }
 
             if (activarBokeh && composer) {
