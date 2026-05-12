@@ -127,7 +127,7 @@
         </div>
         
         <!-- Contenedor Inferior: Botones -->
-        <div class="w-full flex flex-col items-center justify-end shrink-0" style="padding-bottom: max(4rem, calc(4rem + env(safe-area-inset-bottom)));">
+        <div class="w-full flex flex-col items-center justify-end shrink-0" style="padding-bottom: max(8rem, calc(8rem + env(safe-area-inset-bottom)));">
             
             <!-- Botones (Iconos flotantes) -->
             <div class="flex gap-6 interactive" id="botones">
@@ -277,12 +277,12 @@
             const sujetoZ     = sujetoLayer ? sujetoLayer.z : 0;
             const focalDistance = camera.position.z - sujetoZ;
 
-            console.log("🎯 Enfocando a distancia:", focalDistance, "en capa Z:", sujetoZ);
+            console.log("🎯 FOCO CINEMATOGRÁFICO:", focalDistance, "Z:", sujetoZ);
 
             bokehPass = new THREE.BokehPass(scene, camera, {
                 focus:    focalDistance, 
-                aperture: 0.001,       // Apertura muy pequeña = área de nitidez más ancha
-                maxblur:  0.005,       // Desenfoque suave para que no se vea "sucio"
+                aperture: 0.05,        // ¡Mucha más apertura para desenfoque fuerte!
+                maxblur:  0.02,        // Desenfoque máximo más exagerado
                 width: window.innerWidth, height: window.innerHeight
             });
             composer.addPass(bokehPass);
