@@ -127,7 +127,7 @@
         </div>
         
         <!-- Contenedor Inferior: Botones -->
-        <div class="w-full flex flex-col items-center justify-end shrink-0 mb-16 md:mb-24">
+        <div class="w-full flex flex-col items-center justify-end shrink-0" style="padding-bottom: max(4rem, calc(4rem + env(safe-area-inset-bottom)));">
             
             <!-- Botones (Iconos flotantes) -->
             <div class="flex gap-6 interactive" id="botones">
@@ -272,14 +272,17 @@
             renderPass = new THREE.RenderPass(scene, camera);
             composer.addPass(renderPass);
             
-            // Calcular foco dinámico: si hay sujeto marcado, usamos su Z; si no, Z=0 por defecto
+            // Foco normalizado: BokehShader r128 usa depth buffer (0=near, 1=far)
+            // Hay que convertir la distancia mundo a ese rango (0-1)
             const sujetoLayer = layersData.find(l => l.esSujetoFoco);
-            const sujetoZ = sujetoLayer ? sujetoLayer.z : 0;
-            const focalDistance = camera.position.z - sujetoZ; // Distancia exacta cámara → sujeto
+            const sujetoZ     = sujetoLayer ? sujetoLayer.z : 0;
+            const worldDist   = camera.position.z - sujetoZ;          // ej. 15
+            const focusNorm   = (worldDist - camera.near) / (camera.far - camera.near); // ~0.015
 
             bokehPass = new THREE.BokehPass(scene, camera, {
-                focus: focalDistance,
-                aperture: 0.005, maxblur: 0.01,
+                focus:    focusNorm,   // valor normalizado correcto
+                aperture: 0.003,       // suave, solo desenfoca capas lejanas
+                maxblur:  0.008,       // sutil, cinematográfico
                 width: window.innerWidth, height: window.innerHeight
             });
             composer.addPass(bokehPass);
@@ -346,14 +349,34 @@
             mouseY = (event.clientY - windowHalfY) * 0.001;
         });
 
-            if (window.DeviceOrientationEvent) {
-                window.addEventListener('deviceorientation', (event) => {
-                    const gamma = Math.max(-45, Math.min(45, event.gamma || 0));
-                    const beta = Math.max(-45, Math.min(45, (event.beta || 0) - 45));
-                    mouseX = gamma * 0.025;
-                    mouseY = beta * 0.025;
-                });
-            }
+        // ── Giroscopio con solicitud de permiso (iOS Safari + Brave) ──────────────
+        function activarGiroscopio() {
+            window.addEventListener('deviceorientation', (event) => {
+                if (event.gamma === null && event.beta === null) return; // sin datos reales
+                const gamma = Math.max(-45, Math.min(45, event.gamma || 0));
+                const beta  = Math.max(-45, Math.min(45, (event.beta  || 0) - 45));
+                mouseX = gamma * 0.025;
+                mouseY = beta  * 0.025;
+            });
+        }
+
+        if (typeof DeviceOrientationEvent !== 'undefined' &&
+            typeof DeviceOrientationEvent.requestPermission === 'function') {
+            // iOS 13+ y Brave: requiere gesto del usuario
+            const btn = document.createElement('button');
+            btn.id = 'gyro-btn';
+            btn.textContent = '🌀 Activar movimiento';
+            btn.style.cssText = 'position:fixed;bottom:calc(1rem + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:200;padding:0.5rem 1.2rem;background:rgba(255,255,255,0.15);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,0.3);border-radius:2rem;color:#fff;font-size:0.85rem;cursor:pointer;';
+            document.body.appendChild(btn);
+            btn.addEventListener('click', () => {
+                DeviceOrientationEvent.requestPermission().then(state => {
+                    if (state === 'granted') { activarGiroscopio(); btn.remove(); }
+                }).catch(() => btn.remove());
+            });
+        } else if (window.DeviceOrientationEvent) {
+            // Android Chrome, Firefox, etc.
+            activarGiroscopio();
+        }
 
         function animate() {
             requestAnimationFrame(animate);
